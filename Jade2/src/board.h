@@ -27,6 +27,8 @@ class Board
 {
 public:
 	Board();
+	void clear();
+	void reset();
 
 private:
 	int pieces[120];
