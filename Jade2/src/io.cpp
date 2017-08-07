@@ -66,7 +66,7 @@ void fen(const std::string line) {
 }
 
 void startInputLoop() {
-    std::unordered_map<std::string, std::function<void(std::string)>> commands;
+    std::unordered_map<std::string, std::function<void(const std::string)>> commands;
     commands.emplace("quit", quit);
     commands.emplace("exit", quit);
     commands.emplace("print", print);
@@ -79,8 +79,8 @@ void startInputLoop() {
         getline(std::cin, line);
 
         for (auto it = commands.begin(); it != commands.end(); it++) {
-            std::string command = it->first;
-            auto func = it->second;
+            const std::string command = it->first;
+            const auto func = it->second;
             if (!line.substr(0, command.length()).compare(command)) {
                 func(line.substr(command.length()));
             }
