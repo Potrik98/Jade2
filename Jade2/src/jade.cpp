@@ -29,6 +29,6 @@ void initConversionArrays() {
 
 int main() {
 	initConversionArrays();
-	
 	test::testParseFen();
+    startInputLoop();
 }

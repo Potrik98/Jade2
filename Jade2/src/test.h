@@ -1,5 +1,5 @@
 #pragma once
 
 namespace test {
-	void testParseFen();
+    void testParseFen();
 }
