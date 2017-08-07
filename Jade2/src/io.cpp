@@ -48,8 +48,21 @@ void quit(std::string input) {
     running = false;
 }
 
-void print(std::string input) {
+void print(const std::string input) {
     printBoard(currentBoard);
+}
+
+void fen(const std::string line) {
+    if (line.length() > 0) {
+        try {
+            const std::string fen = line.substr(1);
+            currentBoard.parseFen(fen);
+        }
+        catch (const std::invalid_argument& e) {
+            std::cout << "Invalid FEN!" << std::endl;
+            std::cout << e.what() << std::endl;
+        }
+    }
 }
 
 void startInputLoop() {
@@ -57,6 +70,8 @@ void startInputLoop() {
     commands.emplace("quit", quit);
     commands.emplace("exit", quit);
     commands.emplace("print", print);
+    commands.emplace("fen", fen);
+    commands.emplace("position fen", fen);
 
     running = true;
     while (running) {
