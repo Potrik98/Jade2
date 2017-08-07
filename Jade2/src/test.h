@@ -4,4 +4,5 @@ namespace test {
     void testParseFen();
     void testIsSquareAttacked();
     void testGenerateAllMoves();
+    void testHashkeys();
 }

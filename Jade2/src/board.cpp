@@ -2,6 +2,7 @@
 #include "boardutils.h"
 #include "piece.h"
 #include "bitboard.h"
+#include "hashkey.h"
 
 #include <algorithm>
 #include <sstream>
@@ -68,7 +69,13 @@ int getPieceFromChar(const char c) {
 }
 
 int getNumberOfBlankSquares(const char c) {
-    return std::max(0, std::min(8, c - '0'));
+    const int val = c - '0';
+    if (val < 1 || val > 8) {
+        std::ostringstream msg;
+        msg << "Unexpected character: " << c;
+        throw std::invalid_argument(msg.str());
+    }
+    return val;
 }
 
 void assertIndexInString(const int index, const std::string string) {
@@ -148,6 +155,7 @@ int Board::parseCastlePermission(const std::string fen, const int index) {
             castlePerm |= BQCA;
             break;
         case ' ':
+            return offset;
         case '-':
             return offset + 1;
         default:
@@ -230,6 +238,7 @@ void Board::parseFen(const std::string fen) {
     parseMoveCounters(fen, index);
 
     updatePieceLists();
+    posKey = generatePosKey(this);
 }
 
 void Board::reset() {

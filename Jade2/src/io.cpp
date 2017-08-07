@@ -65,6 +65,10 @@ void fen(const std::string line) {
     }
 }
 
+void reset(const std::string line) {
+    currentBoard.reset();
+}
+
 void startInputLoop() {
     std::unordered_map<std::string, std::function<void(const std::string)>> commands;
     commands.emplace("quit", quit);
@@ -72,6 +76,7 @@ void startInputLoop() {
     commands.emplace("print", print);
     commands.emplace("fen", fen);
     commands.emplace("position fen", fen);
+    commands.emplace("reset", reset);
 
     running = true;
     while (running) {

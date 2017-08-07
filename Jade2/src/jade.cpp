@@ -3,6 +3,7 @@
 #include "test.h"
 #include "io.h"
 #include "bitboard.h"
+#include "hashkey.h"
 
 int sq120to64[120];
 int sq64to120[64];
@@ -38,8 +39,10 @@ void initBitMasks() {
 int main() {
 	initConversionArrays();
     initBitMasks();
+    hashkey::init();
 	test::testParseFen();
     test::testIsSquareAttacked();
     test::testGenerateAllMoves();
+    test::testHashkeys();
     startInputLoop();
 }
