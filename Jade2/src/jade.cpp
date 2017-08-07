@@ -1,6 +1,7 @@
 #include "jade.h"
 #include "boardutils.h"
 #include "test.h"
+#include "io.h"
 
 int sq120to64[120];
 int sq64to120[64];
@@ -28,6 +29,6 @@ void initConversionArrays() {
 
 int main() {
 	initConversionArrays();
-
+	
 	test::testParseFen();
 }
