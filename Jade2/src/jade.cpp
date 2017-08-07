@@ -44,5 +44,6 @@ int main() {
     test::testIsSquareAttacked();
     test::testGenerateAllMoves();
     test::testHashkeys();
+    test::testPolyglotHashkeys();
     startInputLoop();
 }

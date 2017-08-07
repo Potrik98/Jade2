@@ -5,4 +5,5 @@ namespace test {
     void testIsSquareAttacked();
     void testGenerateAllMoves();
     void testHashkeys();
+    void testPolyglotHashkeys();
 }

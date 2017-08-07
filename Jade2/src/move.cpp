@@ -4,22 +4,22 @@
 #include "boardutils.h"
 #include "piece.h"
 
-bool isSquareAttacked(const int sq, const int side, const Board *Board) {
+bool isSquareAttacked(const int sq, const int side, const Board* board) {
     // pawns
     if (side == WHITE) {
-        if (Board->pieces[sq - 11] == wP || Board->pieces[sq - 9] == wP) {
+        if (board->pieces[sq - 11] == wP || board->pieces[sq - 9] == wP) {
             return true;
         }
     }
     else {
-        if (Board->pieces[sq + 11] == bP || Board->pieces[sq + 9] == bP) {
+        if (board->pieces[sq + 11] == bP || board->pieces[sq + 9] == bP) {
             return true;
         }
     }
 
     // knights
     for (int i = 0; i < 8; i++) {
-        int piece = Board->pieces[sq + piece::direction::dirKn[i]];
+        int piece = board->pieces[sq + piece::direction::dirKn[i]];
         if (piece != OFFBOARD && piece::isKnight[piece] && piece::getCol[piece] == side) {
             return true;
         }
@@ -29,7 +29,7 @@ bool isSquareAttacked(const int sq, const int side, const Board *Board) {
     for (int i = 0; i < 4; i++) {
         int dir = piece::direction::dirRk[i];
         int t_sq = sq + dir;
-        int piece = Board->pieces[t_sq];
+        int piece = board->pieces[t_sq];
         while (piece != OFFBOARD) {
             if (piece != EMPTY) {
                 if (piece::isRookQueen[piece] && piece::getCol[piece] == side) {
@@ -38,7 +38,7 @@ bool isSquareAttacked(const int sq, const int side, const Board *Board) {
                 break;
             }
             t_sq += dir;
-            piece = Board->pieces[t_sq];
+            piece = board->pieces[t_sq];
         }
     }
 
@@ -46,7 +46,7 @@ bool isSquareAttacked(const int sq, const int side, const Board *Board) {
     for (int i = 0; i < 4; i++) {
         int dir = piece::direction::dirBi[i];
         int t_sq = sq + dir;
-        int piece = Board->pieces[t_sq];
+        int piece = board->pieces[t_sq];
         while (piece != OFFBOARD) {
             if (piece != EMPTY) {
                 if (piece::isBishopQueen[piece] && piece::getCol[piece] == side) {
@@ -55,13 +55,13 @@ bool isSquareAttacked(const int sq, const int side, const Board *Board) {
                 break;
             }
             t_sq += dir;
-            piece = Board->pieces[t_sq];
+            piece = board->pieces[t_sq];
         }
     }
 
     // kings
     for (int i = 0; i < 8; i++) {
-        int piece = Board->pieces[sq + piece::direction::dirKi[i]];
+        int piece = board->pieces[sq + piece::direction::dirKi[i]];
         if (piece != OFFBOARD && piece::isKing[piece] && piece::getCol[piece] == side) {
             return true;
         }
@@ -70,69 +70,69 @@ bool isSquareAttacked(const int sq, const int side, const Board *Board) {
     return false;
 }
 
-static void addQuietMove(const Board *Board, const int move, MoveList *list) {
+static void addQuietMove(const Board* board, const int move, MoveList *list) {
     list->moves[list->count].move = move;
     list->moves[list->count].score = 0;
     list->count++;
 }
 
-static void addCaptureMove(const Board *Board, const int move, MoveList *list) {
+static void addCaptureMove(const Board* board, const int move, MoveList *list) {
     list->moves[list->count].move = move;
     list->moves[list->count].score = 0;
     list->count++;
 }
 
-static void addEnPassantMove(const Board *Board, const int move, MoveList *list) {
+static void addEnPassantMove(const Board* board, const int move, MoveList *list) {
     list->moves[list->count].move = move;
     list->moves[list->count].score = 0;
     list->count++;
 }
 
-static void addWhitePawnCapMove(const Board *Board, const int from, const int to, const int cap, MoveList *list) {
+static void addWhitePawnCapMove(const Board* board, const int from, const int to, const int cap, MoveList *list) {
     if (getRank[from] == RANK_7) {
-        addCaptureMove(Board, MOVE(from, to, cap, wQ, 0), list);
-        addCaptureMove(Board, MOVE(from, to, cap, wR, 0), list);
-        addCaptureMove(Board, MOVE(from, to, cap, wB, 0), list);
-        addCaptureMove(Board, MOVE(from, to, cap, wN, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, wQ, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, wR, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, wB, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, wN, 0), list);
     }
     else {
-        addCaptureMove(Board, MOVE(from, to, cap, EMPTY, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, EMPTY, 0), list);
     }
 }
 
-static void addWhitePawnMove(const Board *Board, const int from, const int to, MoveList *list) {
+static void addWhitePawnMove(const Board* board, const int from, const int to, MoveList *list) {
     if (getRank[from] == RANK_7) {
-        addQuietMove(Board, MOVE(from, to, EMPTY, wQ, 0), list);
-        addQuietMove(Board, MOVE(from, to, EMPTY, wR, 0), list);
-        addQuietMove(Board, MOVE(from, to, EMPTY, wB, 0), list);
-        addQuietMove(Board, MOVE(from, to, EMPTY, wN, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, wQ, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, wR, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, wB, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, wN, 0), list);
     }
     else {
-        addQuietMove(Board, MOVE(from, to, EMPTY, EMPTY, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, EMPTY, 0), list);
     }
 }
 
-static void addBlackPawnCapMove(const Board *Board, const int from, const int to, const int cap, MoveList *list) {
+static void addBlackPawnCapMove(const Board* board, const int from, const int to, const int cap, MoveList *list) {
     if (getRank[from] == RANK_2) {
-        addCaptureMove(Board, MOVE(from, to, cap, bQ, 0), list);
-        addCaptureMove(Board, MOVE(from, to, cap, bR, 0), list);
-        addCaptureMove(Board, MOVE(from, to, cap, bB, 0), list);
-        addCaptureMove(Board, MOVE(from, to, cap, bN, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, bQ, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, bR, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, bB, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, bN, 0), list);
     }
     else {
-        addCaptureMove(Board, MOVE(from, to, cap, EMPTY, 0), list);
+        addCaptureMove(board, MOVE(from, to, cap, EMPTY, 0), list);
     }
 }
 
-static void addBlackPawnMove(const Board *Board, const int from, const int to, MoveList *list) {
+static void addBlackPawnMove(const Board* board, const int from, const int to, MoveList *list) {
     if (getRank[from] == RANK_2) {
-        addQuietMove(Board, MOVE(from, to, EMPTY, bQ, 0), list);
-        addQuietMove(Board, MOVE(from, to, EMPTY, bR, 0), list);
-        addQuietMove(Board, MOVE(from, to, EMPTY, bB, 0), list);
-        addQuietMove(Board, MOVE(from, to, EMPTY, bN, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, bQ, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, bR, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, bB, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, bN, 0), list);
     }
     else {
-        addQuietMove(Board, MOVE(from, to, EMPTY, EMPTY, 0), list);
+        addQuietMove(board, MOVE(from, to, EMPTY, EMPTY, 0), list);
     }
 }
 

@@ -1,5 +1,6 @@
 #include "hashkey.h"
 #include "boardutils.h"
+#include "io.h"
 
 namespace hashkey {
     U64 keyPiece[13][120];
@@ -232,6 +233,28 @@ namespace hashkey {
     }
 }
 
+static bool isSquareAttackedByPawn(int sq, const Board* board) {
+    if (board->sideToMove == BLACK) {
+        if (board->pieces[sq + 11] == bP || board->pieces[sq + 9] == bP) {
+            return true;
+        }
+    }
+    else {
+        if (board->pieces[sq - 11] == wP || board->pieces[sq - 9] == wP) {
+            return true;
+        }
+    }
+    return false;
+}
+
+U64 generatePolyglotKey(const Board* board) {
+    U64 finalKey = board->posKey;
+    if (board->enPasSquare != NO_SQ && isSquareAttackedByPawn(board->enPasSquare, board)) {
+        finalKey ^= hashkey::keyPiece[EMPTY][board->enPasSquare];
+    }
+    return finalKey;
+}
+
 U64 generatePosKey(const Board* board) {
     int sq = 0;
     U64 finalKey = 0;
@@ -250,10 +273,6 @@ U64 generatePosKey(const Board* board) {
     }
 
     finalKey ^= hashkey::keyCastle[board->castlePerm];
-
-    if (board->enPasSquare != NO_SQ) {
-        finalKey ^= hashkey::keyPiece[EMPTY][board->enPasSquare];
-    }
 
     return finalKey;
 }
