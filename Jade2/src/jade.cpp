@@ -39,5 +39,7 @@ int main() {
 	initConversionArrays();
     initBitMasks();
 	test::testParseFen();
+    test::testIsSquareAttacked();
+    test::testGenerateAllMoves();
     startInputLoop();
 }
