@@ -2,6 +2,7 @@
 #include "boardutils.h"
 #include "test.h"
 #include "io.h"
+#include "bitboard.h"
 
 int sq120to64[120];
 int sq64to120[64];
@@ -27,8 +28,16 @@ void initConversionArrays() {
 	}
 }
 
+void initBitMasks() {
+    for (int i = 0; i < 64; i++) {
+        bitboard::setMask[i] = (1ULL << i);
+        bitboard::clrMask[i] = ~bitboard::setMask[i];
+    }
+}
+
 int main() {
 	initConversionArrays();
+    initBitMasks();
 	test::testParseFen();
     startInputLoop();
 }

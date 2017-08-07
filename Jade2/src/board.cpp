@@ -1,5 +1,7 @@
 #include "board.h"
 #include "boardutils.h"
+#include "piece.h"
+#include "bitboard.h"
 
 #include <algorithm>
 #include <sstream>
@@ -43,6 +45,8 @@ void Board::clear() {
     castlePerm = 0;
 
     posKey = 0ULL;
+
+    updatePieceLists();
 }
 
 int getPieceFromChar(const char c) {
@@ -144,6 +148,7 @@ int Board::parseCastlePermission(const std::string fen, const int index) {
             castlePerm |= BQCA;
             break;
         case ' ':
+        case '-':
             return offset + 1;
         default:
             std::ostringstream msg;
@@ -223,8 +228,37 @@ void Board::parseFen(const std::string fen) {
     index++;
 
     parseMoveCounters(fen, index);
+
+    updatePieceLists();
 }
 
 void Board::reset() {
+    parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+}
 
+void Board::updatePieceLists() {
+    for (int sq = 0; sq < 120; sq++) {
+        int piece = pieces[sq];
+        if (piece != OFFBOARD && piece != EMPTY) {
+            int color = piece::getCol[piece];
+
+            if (piece::isBig[piece]) pieceBig[color]++;
+            if (piece::isMin[piece]) pieceMin[color]++;
+            if (piece::isMaj[piece]) pieceMaj[color]++;
+
+            material[color] += piece::getVal[piece];
+
+            pieceSquareList[piece][pieceNum[piece]] = sq;
+            pieceNum[piece]++;
+
+            if (piece == wP) {
+                SETBIT(pawns[WHITE], SQ64(sq));
+                SETBIT(pawns[BOTH], SQ64(sq));
+            }
+            else if (piece == bP) {
+                SETBIT(pawns[BLACK], SQ64(sq));
+                SETBIT(pawns[BOTH], SQ64(sq));
+            }
+        }
+    }
 }

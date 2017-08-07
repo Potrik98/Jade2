@@ -59,4 +59,5 @@ private:
     int parseCastlePermission(const std::string fen, const int index);
     int parseEnPassantSquare(const std::string fen, const int index);
     void parseMoveCounters(const std::string fen, const int index);
+    void updatePieceLists();
 };
