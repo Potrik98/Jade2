@@ -29,8 +29,8 @@ public:
 	Board();
 	void clear();
 	void reset();
+	void parseFen(const std::string fen);
 
-private:
 	int pieces[120];
 	U64 pawns[3];
 
@@ -39,7 +39,7 @@ private:
 	int fiftyMove;
 
 	int ply;
-	int hisPly;
+	int plyTotal;
 
 	int castlePerm;
 
@@ -52,4 +52,11 @@ private:
 	int material[2];
 
 	int pieceSquareList[13][10];
+
+private:
+	void parseRank(const std::string format, const int rank);
+	void parseSideToMove(const std::string fen, const int index);
+	int parseCastlePermission(const std::string fen, const int index);
+	int parseEnPassantSquare(const std::string fen, const int index);
+	void parseMoveCounters(const std::string fen, const int index);
 };
