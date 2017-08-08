@@ -4,6 +4,7 @@
 #include "io.h"
 #include "bitboard.h"
 #include "hashkey.h"
+#include "perft.h"
 
 int sq120to64[120];
 int sq64to120[64];
@@ -46,5 +47,6 @@ int main() {
     test::testHashkeys();
     test::testPolyglotHashkeys();
     test::perftTests();
+    runPerftTests("perftsuite.epd");
     startInputLoop();
 }

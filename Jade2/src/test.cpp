@@ -196,6 +196,6 @@ namespace test {
         printf("nodes: %d\n", res);
         if (res  != 3894594) throw std::runtime_error("Test failed!");
 
-        printf("Perft tests complete");
+        printf("Perft tests complete\n");
     }
 }
