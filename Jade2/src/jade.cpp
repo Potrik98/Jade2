@@ -45,5 +45,6 @@ int main() {
     test::testGenerateAllMoves();
     test::testHashkeys();
     test::testPolyglotHashkeys();
+    test::perftTests();
     startInputLoop();
 }

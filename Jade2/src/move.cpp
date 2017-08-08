@@ -3,6 +3,23 @@
 #include "move.h"
 #include "boardutils.h"
 #include "piece.h"
+#include "hashkey.h"
+#include "bitboard.h"
+
+const int castlePerm[120] = {
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 13, 15, 15, 15, 12, 15, 15, 14, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15,  7, 15, 15, 15,  3, 15, 15, 11, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15
+};
 
 bool isSquareAttacked(const int sq, const int side, const Board* board) {
     // pawns
@@ -272,5 +289,231 @@ void generateAllMoves(const Board* board, MoveList *list) {
         }
 
         piece++;
+    }
+}
+
+static void clearPiece(const int sq, Board *board) {
+    int piece = board->pieces[sq];
+
+    int col = piece::getCol[piece];
+    int index = 0;
+    int t_pieceNum = -1;
+
+    HASH_PCE(piece, sq);
+
+    board->pieces[sq] = EMPTY;
+    board->material[col] -= piece::getVal[piece];
+
+    if (piece::isBig[piece]) {
+        board->pieceBig[col]--;
+        if (piece::isMaj[piece]) {
+            board->pieceMaj[col]--;
+        }
+        else {
+            board->pieceMin[col]--;
+        }
+    }
+    else {
+        CLRBIT(board->pawns[col], SQ64(sq));
+        CLRBIT(board->pawns[BOTH], SQ64(sq));
+    }
+
+    for (index = 0; index < board->pieceNum[piece]; ++index) {
+        if (board->pieceSquareList[piece][index] == sq) {
+            t_pieceNum = index;
+            break;
+        }
+    }
+
+    board->pieceNum[piece]--;
+    board->pieceSquareList[piece][t_pieceNum] = board->pieceSquareList[piece][board->pieceNum[piece]];
+}
+
+
+static void addPiece(const int sq, Board *board, const int piece) {
+    int col = piece::getCol[piece];
+
+    HASH_PCE(piece, sq);
+
+    board->pieces[sq] = piece;
+
+    if (piece::isBig[piece]) {
+        board->pieceBig[col]++;
+        if (piece::isMaj[piece]) {
+            board->pieceMaj[col]++;
+        }
+        else {
+            board->pieceMin[col]++;
+        }
+    }
+    else {
+        SETBIT(board->pawns[col], SQ64(sq));
+        SETBIT(board->pawns[BOTH], SQ64(sq));
+    }
+
+    board->material[col] += piece::getVal[piece];
+    board->pieceSquareList[piece][board->pieceNum[piece]++] = sq;
+
+}
+
+static void movePiece(const int from, const int to, Board *board) {
+    int index = 0;
+    int piece = board->pieces[from];
+    int col = piece::getCol[piece];
+
+    HASH_PCE(piece, from);
+    board->pieces[from] = EMPTY;
+
+    HASH_PCE(piece, to);
+    board->pieces[to] = piece;
+
+    if (!piece::isBig[piece]) {
+        CLRBIT(board->pawns[col], SQ64(from));
+        CLRBIT(board->pawns[BOTH], SQ64(from));
+        SETBIT(board->pawns[col], SQ64(to));
+        SETBIT(board->pawns[BOTH], SQ64(to));
+    }
+
+    for (index = 0; index < board->pieceNum[piece]; ++index) {
+        if (board->pieceSquareList[piece][index] == from) {
+            board->pieceSquareList[piece][index] = to;
+            break;
+        }
+    }
+}
+
+bool makeMove(Board *board, const int move) {
+    int from = FROMSQ(move);
+    int to = TOSQ(move);
+    int side = board->sideToMove;
+
+    board->history[board->plyTotal].posKey = board->posKey;
+
+    if (move & MFLAG_EP) {
+        if (side == WHITE) {
+            clearPiece(to - 10, board);
+        }
+        else {
+            clearPiece(to + 10, board);
+        }
+    }
+    else if (move & MFLAG_CA) {
+        switch (to) {
+        case C1:
+            movePiece(A1, D1, board);
+            break;
+        case C8:
+            movePiece(A8, D8, board);
+            break;
+        case G1:
+            movePiece(H1, F1, board);
+            break;
+        case G8:
+            movePiece(H8, F8, board);
+            break;
+        }
+    }
+
+    HASH_CA;
+
+    board->history[board->plyTotal].move = move;
+    board->history[board->plyTotal].fiftyMove = board->fiftyMove;
+    board->history[board->plyTotal].enPas = board->enPasSquare;
+    board->history[board->plyTotal].castlePerm = board->castlePerm;
+
+    board->castlePerm &= castlePerm[from];
+    board->castlePerm &= castlePerm[to];
+    board->enPasSquare = NO_SQ;
+
+    HASH_CA;
+
+    int captured = CAP(move);
+    board->fiftyMove++;
+
+    if (captured != EMPTY) {
+        clearPiece(to, board);
+        board->fiftyMove = 0;
+    }
+
+    board->plyTotal++;
+    board->ply++;
+
+    if (piece::isPawn[board->pieces[from]]) {
+        board->fiftyMove = 0;
+        if (move & MFLAG_PS) {
+            if (side == WHITE) {
+                board->enPasSquare = from + 10;
+            }
+            else {
+                board->enPasSquare = from - 10;
+            }
+        }
+    }
+
+    movePiece(from, to, board);
+
+    int prPce = PROM(move);
+    if (prPce != EMPTY) {
+        clearPiece(to, board);
+        addPiece(to, board, prPce);
+    }
+
+    board->sideToMove ^= 1;
+    HASH_SIDE;
+
+    if ((board->sideToMove == BLACK && isSquareAttacked(board->pieceSquareList[wK][0], BLACK, board)) || (board->sideToMove == WHITE && isSquareAttacked(board->pieceSquareList[bK][0], WHITE, board))) {
+        takeMove(board);
+        return false;
+    }
+
+    return true;
+}
+
+void takeMove(Board *board) {
+    board->plyTotal--;
+    board->ply--;
+
+    int move = board->history[board->plyTotal].move;
+    int from = FROMSQ(move);
+    int to = TOSQ(move);
+
+    HASH_CA;
+
+    board->castlePerm = board->history[board->plyTotal].castlePerm;
+    board->fiftyMove = board->history[board->plyTotal].fiftyMove;
+    board->enPasSquare = board->history[board->plyTotal].enPas;
+
+    HASH_CA;
+
+    board->sideToMove ^= 1;
+    HASH_SIDE;
+
+    if (MFLAG_EP & move) {
+        if (board->sideToMove == WHITE) {
+            addPiece(to - 10, board, bP);
+        }
+        else {
+            addPiece(to + 10, board, wP);
+        }
+    }
+    else if (MFLAG_CA & move) {
+        switch (to) {
+        case C1: movePiece(D1, A1, board); break;
+        case C8: movePiece(D8, A8, board); break;
+        case G1: movePiece(F1, H1, board); break;
+        case G8: movePiece(F8, H8, board); break;
+        }
+    }
+
+    movePiece(to, from, board);
+
+    int captured = CAP(move);
+    if (captured != EMPTY) {
+        addPiece(to, board, captured);
+    }
+
+    if (PROM(move) != EMPTY) {
+        clearPiece(from, board);
+        addPiece(from, board, (piece::getCol[PROM(move)] == WHITE ? wP : bP));
     }
 }

@@ -14,7 +14,6 @@ namespace hashkey {
 U64 generatePosKey(const Board* board);
 U64 generatePolyglotKey(const Board* board);
 
-#define HASH_PCE(pce,sq) (pos->posKey ^= (hashkey::keyPiece[(pce)][(sq)]))
-#define HASH_CA (pos->posKey ^= (hashkey::keyCastle[(pos->castlePerm)]))
-#define HASH_SIDE (pos->posKey ^= (hashkey::keySide))
-#define HASH_EP (pos->posKey ^= (hashkey::keyPiece[EMPTY][(pos->enPas)]))
+#define HASH_PCE(pce,sq) (board->posKey ^= (hashkey::keyPiece[(pce)][(sq)]))
+#define HASH_CA (board->posKey ^= (hashkey::keyCastle[(board->castlePerm)]))
+#define HASH_SIDE (board->posKey ^= (hashkey::keySide))

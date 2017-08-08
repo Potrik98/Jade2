@@ -27,3 +27,6 @@ typedef struct {
 
 void generateAllMoves(const Board* board, MoveList* list);
 bool isSquareAttacked(const int sq, const int side, const Board* board);
+
+bool makeMove(Board* board, const int move);
+void takeMove(Board* board);

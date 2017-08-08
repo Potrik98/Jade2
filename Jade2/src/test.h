@@ -6,4 +6,5 @@ namespace test {
     void testGenerateAllMoves();
     void testHashkeys();
     void testPolyglotHashkeys();
+    void perftTests();
 }

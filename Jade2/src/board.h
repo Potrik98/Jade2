@@ -23,6 +23,14 @@ enum {
     A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ
 };
 
+typedef struct {
+    int move;
+    int castlePerm;
+    int enPas;
+    int fiftyMove;
+    U64 posKey;
+} S_UNDO;
+
 class Board
 {
 public:
@@ -52,6 +60,8 @@ public:
     int material[2];
 
     int pieceSquareList[13][10];
+
+    S_UNDO history[1024];
 
 private:
     void parseRank(const std::string format, const int rank);

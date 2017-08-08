@@ -3,6 +3,7 @@
 #include "move.h"
 #include "boardutils.h"
 #include "hashkey.h"
+#include "perft.h"
 
 namespace test {
     void testParseFen() {
@@ -156,5 +157,45 @@ namespace test {
 
         board.parseFen("rnbqkbnr/p1pppppp/8/8/P6P/R1p5/1P1PPPP1/1NBQKBNR b Kkq - 0 4");
         if (generatePolyglotKey(&board) != 0x5c3f9b829b279560ULL) throw std::runtime_error("Test failed!");
+    }
+
+    void perftTests() {
+        Board board;
+        board.parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        U64 res = perft(5, &board);
+        printf("nodes: %d\n", res);
+        if (res != 4865609) throw std::runtime_error("Test failed!");
+
+        board.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+        res = perft(4, &board);
+        printf("nodes: %d\n", res);
+        if (res  != 4085603) throw std::runtime_error("Test failed!");
+
+        board.parseFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
+        res = perft(6, &board);
+        printf("nodes: %d\n", res);
+        if (res  != 11030083) throw std::runtime_error("Test failed!");
+
+        board.parseFen("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+        res = perft(5, &board);
+        printf("nodes: %d\n", res);
+        if (res  != 15833292) throw std::runtime_error("Test failed!");
+
+        board.parseFen("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1");
+        res = perft(5, &board);
+        printf("nodes: %d\n", res);
+        if (res  != 15833292) throw std::runtime_error("Test failed!");
+
+        board.parseFen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
+        res = perft(4, &board);
+        printf("nodes: %d\n", res);
+        if (res  != 2103487) throw std::runtime_error("Test failed!");
+
+        board.parseFen("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
+        res = perft(4, &board);
+        printf("nodes: %d\n", res);
+        if (res  != 3894594) throw std::runtime_error("Test failed!");
+
+        printf("Perft tests complete");
     }
 }

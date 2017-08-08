@@ -194,8 +194,13 @@ int Board::parseEnPassantSquare(const std::string fen, int index) {
 }
 
 void Board::parseMoveCounters(const std::string fen, const int index) {
-    assertIndexInString(index + 2, fen);
-    std::istringstream(fen.substr(index)) >> fiftyMove >> plyTotal;
+    if (index + 2 >= fen.length()) {
+        fiftyMove = 0;
+        plyTotal = 1;
+    }
+    else {
+        std::istringstream(fen.substr(index)) >> fiftyMove >> plyTotal;
+    }
     plyTotal *= 2;
     if (sideToMove == WHITE) plyTotal -= 1;
 }
