@@ -7,4 +7,5 @@ namespace test {
     void testHashkeys();
     void testPolyglotHashkeys();
     void perftTests();
+    void testMoveExists();
 }

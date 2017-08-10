@@ -47,6 +47,7 @@ int main() {
     test::testHashkeys();
     test::testPolyglotHashkeys();
     test::perftTests();
+    test::testMoveExists();
     runPerftTests("perftsuite.epd");
     startInputLoop();
 }

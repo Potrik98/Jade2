@@ -21,6 +21,21 @@ const int castlePerm[120] = {
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15
 };
 
+bool moveExists(Board* board, const int move) {
+    MoveList list[1];
+    generateAllMoves(board, list);
+
+    for (int i = 0; i < list->count; i++) {
+        if (list->moves[i].move == move) {
+            if (!makeMove(board, list->moves[i].move)) return false;
+            takeMove(board);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool isSquareAttacked(const int sq, const int side, const Board* board) {
     // pawns
     if (side == WHITE) {

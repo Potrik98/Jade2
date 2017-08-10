@@ -30,3 +30,5 @@ bool isSquareAttacked(const int sq, const int side, const Board* board);
 
 bool makeMove(Board* board, const int move);
 void takeMove(Board* board);
+
+bool moveExists(Board* board, const int move);

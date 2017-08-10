@@ -198,4 +198,17 @@ namespace test {
 
         printf("Perft tests complete\n");
     }
+
+    void testMoveExists() {
+        Board board;
+        board.parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        int move = MOVE(E2, E4, 0, 0, MFLAG_PS);
+        if (!moveExists(&board, move)) throw std::runtime_error("Test failed!");
+        move = MOVE(E2, E5, 0, 0, 0);
+        if (moveExists(&board, move)) throw std::runtime_error("Test failed!");
+        move = MOVE(B1, C3, 0, 0, 0);
+        if (!moveExists(&board, move)) throw std::runtime_error("Test failed!");
+        move = MOVE(E2, E3, 0, 0, 0);
+        if (!moveExists(&board, move)) throw std::runtime_error("Test failed!");
+    }
 }
