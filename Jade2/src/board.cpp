@@ -3,6 +3,7 @@
 #include "piece.h"
 #include "bitboard.h"
 #include "hashkey.h"
+#include "pvtable.h"
 
 #include <algorithm>
 #include <sstream>
@@ -10,6 +11,22 @@
 
 Board::Board() {
     clear();
+    isHashTableInitialized = false;
+}
+
+Board::~Board() {
+    if (isHashTableInitialized) {
+        delete[] hashTable;
+    }
+}
+
+void Board::initHashTable() {
+    hashTable = new S_HASH_ENTRY[HASH_ENTRIES];
+    for (int i = 0; i < HASH_ENTRIES; i++) {
+        hashTable[i].posKey = 0;
+        hashTable[i].move = 0;
+    }
+    isHashTableInitialized = true;
 }
 
 void Board::clear() {

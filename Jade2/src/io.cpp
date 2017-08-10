@@ -1,9 +1,14 @@
 #include "io.h"
 #include "boardutils.h"
+#include "pvtable.h"
+#include "move.h"
+#include "search.h"
 
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 #include <functional>
+#include <thread>
 
 char charPiece[] = ".PNBRQKpnbrqkx";
 char charSide[] = "wb-";
@@ -11,7 +16,10 @@ char charRank[] = "123456RANK_88";
 char charFile[] = "abcdefgh";
 
 bool running = false;
+bool isSearching = false;
 Board currentBoard;
+SearchInfo searchInfo[1];
+std::thread *threadSearch;
 
 void printBoard(const Board board) {
     int sq, file, rank, piece;
@@ -67,6 +75,23 @@ void fen(const std::string line) {
 
 void reset(const std::string line) {
     currentBoard.reset();
+    currentBoard.initHashTable();
+}
+
+void startSearch(const std::string line) {
+    searchInfo->stop = false;
+    isSearching = true;
+    std::istringstream(line.substr(1)) >> searchInfo->maxDepth;
+    threadSearch = new std::thread(search, &currentBoard, searchInfo);
+}
+
+void stopSearch(const std::string line) {
+    searchInfo->stop = true;
+    if (isSearching) {
+        threadSearch->join();
+        delete(threadSearch);
+        isSearching = false;
+    }
 }
 
 void startInputLoop() {
@@ -77,6 +102,8 @@ void startInputLoop() {
     commands.emplace("fen", fen);
     commands.emplace("position fen", fen);
     commands.emplace("reset", reset);
+    commands.emplace("search", startSearch);
+    commands.emplace("stop", stopSearch);
 
     running = true;
     while (running) {
@@ -90,5 +117,34 @@ void startInputLoop() {
                 func(line.substr(command.length()));
             }
         }
+    }
+}
+
+std::string prMove(const int move) {
+    int ff = getFile[FROMSQ(move)];
+    int rf = getRank[FROMSQ(move)];
+    int ft = getFile[TOSQ(move)];
+    int rt = getRank[TOSQ(move)];
+
+    int promoted = PROM(move);
+
+    std::ostringstream result;
+
+    result << ('a' + ff) << ('1' + rf) << ('a' + ft) << ('1' + rt);
+
+    if (promoted) {
+        result << charPiece[promoted];
+    }
+
+    return result.str();
+}
+
+void printPvLine(Board* board, int depth) {
+    int count = getPvLine(board, depth);
+
+    std::cout << " count: " << count;
+
+    for (int i = 0; i < count; i++) {
+        std::cout << " " << prMove(board->pvArray[i]);
     }
 }

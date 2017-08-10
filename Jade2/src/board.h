@@ -31,10 +31,21 @@ typedef struct {
     U64 posKey;
 } S_UNDO;
 
+typedef struct {
+    U64 posKey;
+    int move;
+    int score;
+    int depth;
+    int flags;
+} S_HASH_ENTRY;
+
 class Board
 {
 public:
     Board();
+    ~Board();
+    void initHashTable();
+    void clearHashTable();
     void clear();
     void reset();
     void parseFen(const std::string fen);
@@ -61,8 +72,10 @@ public:
 
     int pieceSquareList[13][10];
 
-    S_UNDO history[1024];
+    int pvArray[MAX_SEARCH_DEPTH];
 
+    S_UNDO history[1024];
+    S_HASH_ENTRY *hashTable;
 private:
     void parseRank(const std::string format, const int rank);
     void parseSideToMove(const std::string fen, const int index);
@@ -70,4 +83,6 @@ private:
     int parseEnPassantSquare(const std::string fen, const int index);
     void parseMoveCounters(const std::string fen, const int index);
     void updatePieceLists();
+
+    bool isHashTableInitialized;
 };

@@ -38,6 +38,8 @@ void initBitMasks() {
 }
 
 int main() {
+#define DEBUG
+#ifdef DEBUG
 	initConversionArrays();
     initBitMasks();
     hashkey::init();
@@ -49,5 +51,6 @@ int main() {
     test::perftTests();
     test::testMoveExists();
     runPerftTests("perftsuite.epd");
+#endif // DEBUG
     startInputLoop();
 }
